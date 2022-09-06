@@ -2,19 +2,27 @@
 
 namespace App\Controller;
 
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use App\Entity\Category;
+use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class FrontController extends AbstractController
 {
+    private $em;
+
+    public function __construct(ManagerRegistry $registry)
+    {
+        $this->em = $registry;
+    }
     #[Route('/front', name: 'front')]
     public function index(): Response
     {
         return $this->render('front/index.html.twig');
     }
 
-    #[Route('/video_list', name: 'video_list')]
+    #[Route("/video-list/category/{categoryname},{id}", name: "video_list")]
     public function videoList(): Response
     {
         return $this->render('front/video_list.html.twig');
@@ -54,5 +62,15 @@ class FrontController extends AbstractController
     public function payment(): Response
     {
         return $this->render('front/payment.html.twig');
+    }
+
+    
+    public function mainCategories()
+    {
+      $categories = $this->em->getRepository(Category::class)
+        ->findBy(['parent'=>null], ['name'=>'ASC']);
+        return $this->render('front/main_categories.html.twig',[
+            'categories'=>$categories
+        ]);
     }
 }
